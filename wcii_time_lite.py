@@ -1,17 +1,21 @@
+#-*- coding: utf-8 -*-
 import datetime
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 import urllib.request
-from os import getenv
+import wcii_var
+from WTFerror import *
 
-appdatafolder = getenv('localappdata') + "/whatclockisit/light/"
-appdatafolder = appdatafolder.replace("\\", "/").replace("\\", "/").replace("\\", "/").replace("\\", "/")
-appdata = appdatafolder + "data/data.wcii"
+wc = wcii_var.wcii()
 
-def wciitime():
-    now = datetime.datetime.now()
-    nowtime = now.strftime('%H%M')
-    nowtime = str(nowtime)
+def wciitime(time=None):
+    if time == None:
+        now = datetime.datetime.now()
+        nowtime = now.strftime('%H%M')
+        nowtime = str(nowtime)
+    else:
+        nowtime = str(time)
+
     if nowtime == '0000':
         showtime = "지금은 자정이야"
         return showtime
@@ -65,20 +69,23 @@ def wciitime():
         showtime = showhour + showminu + "이야."
         return showtime
 
-class no_online(Exception):
-    pass
-
-def wciitext():
-    now = datetime.datetime.now()
-    nowdate = now.strftime('%H')
-    time_now = int(nowdate) // 2 + 1
-    time_now = time_now
+def wciitext(hour=None):
+    if hour == None:
+        now = datetime.datetime.now()
+        nowdate = now.strftime('%H')
+        time_now = int(nowdate) // 2 + 1
+    else:
+        #이후에 24시간 기반 api가 구축되면 수정
+        now = datetime.datetime.now()
+        nowdate = now.strftime('%H')
+        time_now = int(nowdate) // 2 + 1
     try:
+        #24시간 기반 api 추가
         opener = urllib.request.build_opener()
         opener.addheaders = [('User-Agent',
                               'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
         urllib.request.install_opener(opener)
-        url = urlopen(f'http://hyuns.space/api/hanguel/{time_now}/index.php', timeout=3)
+        url = urlopen(f'http://hyuns.space/api/hanguel/{time_now}/index.php', timeout=5)
         #url = urlopen(f'http://localhost:8080/api/{time_now}/index.php', timeout=3)
         soup = BeautifulSoup(url, "lxml")
         soup = str(soup.body)
@@ -90,30 +97,62 @@ def wciitext():
 
     except Exception as e:
         print(f"서버연결 오류발생 : {e}")
+        writelog("neterror", e)
 
-        if time_now == 1:
+        time_now = int(nowdate)
+        if time_now == 0:
             showtext = "좋은 꿈 꿔"
+        elif time_now == 1:
+            showtext = "헉?! 아직도 안 잤어?"
         elif time_now == 2:
             showtext = "아직 안 자고 뭐해?"
         elif time_now == 3:
-            showtext = "오늘도 좋은 아침"
+            showtext = "음.. 졸리지 않니?"
         elif time_now == 4:
-            showtext = "잠은 잘 잤니?"
+            showtext = "하아암.. 졸립당"
         elif time_now == 5:
-            showtext = "아침은 먹었니?"
+            showtext = "지금 쯤이면 해가 뜰려나..?"
         elif time_now == 6:
-            showtext = "지금 뭐해?"
+            showtext = "벌써 새벽이네"
         elif time_now == 7:
-            showtext = "뭐하고 있어?"
+            showtext = "상쾌한 아침"
         elif time_now == 8:
-            showtext = "기재기 한 번 어때?"
+            showtext = "오늘은 뭐해?"
         elif time_now == 9:
-            showtext = "힘들지 않아?"
+            showtext = "힘쌔고 강한 아침!"
         elif time_now == 10:
-            showtext = "오늘 저녁 맛있었어?"
+            showtext = "지금은 뭐하시나..?"
         elif time_now == 11:
-            showtext = "지금 뭐해?"
+            showtext = "(대충 할 말이 없다는 말)"
         elif time_now == 12:
-            showtext = "굿나잇!"
+            showtext = "쩝..배고프당"
+        elif time_now == 13:
+            showtext = "밥 맛있게 먹었어?"
+        elif time_now == 14:
+            showtext = "더 열심히!"
+        elif time_now == 15:
+            showtext = "나른하당..ㅎ"
+        elif time_now == 16:
+            showtext = "헉 벌써"
+        elif time_now == 17:
+            showtext = "지금 뭐해?"
+        elif time_now == 18:
+            showtext = "슬슬 배고파진다 ㅎㅎ"
+        elif time_now == 19:
+            showtext = "해가 슬슬 지고 있겠네.." #계절마다 달라져야 함
+        elif time_now == 20:
+            showtext = "저녁 맛있게 먹었어?"
+        elif time_now == 21:
+            showtext = "벌써"
+        elif time_now == 22:
+            showtext = "오늘은 별이 보일려나?"
+        elif time_now == 23:
+            showtext = "슬슬 졸립지 않아?"
+        elif time_now == 24:
+            showtext = "좋은 꿈 꿔"
 
     return showtext
+
+if __name__ == '__main__':
+    print(wciitime())
+    print(wciitext())
